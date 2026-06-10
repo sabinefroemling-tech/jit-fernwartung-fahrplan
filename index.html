@@ -82,97 +82,197 @@ footer{margin-top:34px;border-top:1px solid var(--line);padding-top:15px;font-si
   .tmpl,.stage,.q{break-inside:avoid;}
   @page{margin:14mm;}
 }
+.langsw{position:absolute;top:0;right:0;display:flex;border:1px solid var(--ink);}
+.langsw button{font-family:inherit;font-size:11px;font-weight:600;padding:5px 11px;border:0;background:transparent;color:var(--ink);cursor:pointer;letter-spacing:1px;}
+.langsw button.on{background:var(--ink);color:#fff;}
+@media print{.langsw{display:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
-<header class="noprint">
-  <div class="kicker">OT-Security · Companion zum Buch</div>
-  <h1>JIT-Fernwartungs-Fahrplan</h1>
-  <p class="sub">Fernwartung ist der häufigste Eintrittsvektor in der OT. Dieses Werkzeug erzeugt aus wenigen Angaben einen individuellen Fahrplan entlang des Vier-Stufen-Modells — <b>Inventar → Deaktivierung (Just-in-Time) → Single-Channel → Session-Recording</b> — inklusive Register-Vorlage, JIT-Checkliste, Richtlinien-Formulierung und Betriebsvereinbarungs-Muster. <span class="sig">§</span> Alles bleibt im Browser.</p>
-  <p class="ref">Methodik nach „ISMS für die Industrie“, Kap. 22.2 (Vier-Stufen-Modell), 15.4 (Fernwartung/Jump-Host) und 26.6 (Verarbeitungsverzeichnis). Rechtsbezug: §87 Abs. 1 Nr. 6 BetrVG, DSGVO.</p>
+<header class="noprint" style="position:relative">
+  <div class="langsw noprint"><button id="lde" class="on" onclick="setLang('de')">DE</button><button id="len" onclick="setLang('en')">EN</button></div>
+  <div class="kicker" data-t="kicker"></div>
+  <h1 data-t="h1"></h1>
+  <p class="sub" data-t="sub"></p>
+  <p class="ref" data-t="ref"></p>
 </header>
 
 <details class="noprint">
-<summary>Das Vier-Stufen-Modell, die Voraussetzungen & die Rechtslage (lesen)</summary>
-<p><b>Stufe 1 — Inventar:</b> Alle Fernwartungszugänge im Register erfassen (wer, welches System, seit wann, warum, welches Protokoll), jeweils mit eindeutiger ID und benanntem Owner.</p>
-<p><b>Stufe 2 — Deaktivierung im Ruhezustand:</b> Zugänge standardmäßig deaktiviert; Aktivierung nur auf zeitlich begrenzten Antrag, automatische Deaktivierung nach Auftragsende (Just-in-Time).</p>
-<p><b>Stufe 3 — Single-Channel:</b> Nur ein genehmigter Weg über das zentrale, protokollierte Gateway — kein direktes RDP, kein eigenständiges Hersteller-VPN, keine Schatten-Tools.</p>
-<p><b>Stufe 4 — Session-Recording:</b> Vollständige Aufzeichnung jeder Session, Aufbewahrung mindestens 90 Tage, Zugriff nur durch OT-Security-Team, im Vorfall durch Forensik.</p>
-<p><b>Voraussetzungen (Kap. 22.2):</b> zentrales Gateway mit MFA, Genehmigungs-Workflow, Recording-Infrastruktur, Schulung der externen Dienstleister. Die Investition rechnet sich erfahrungsgemäß in 12–24 Monaten.</p>
-<p><b>Rechtslage (häufigster Fehler):</b> Session-Recording wird eingeführt, ohne die personenbezogene Konstellation zu klären. Korrekte Reihenfolge: (1) Datenströme klären (rein OEM oder gemischt mit internem Personal), (2) Aufnahme ins Verarbeitungsverzeichnis, (3) Betriebsvereinbarung <i>nur sofern interne Mitarbeiter erfasst werden</i> (§87 Abs. 1 Nr. 6 BetrVG), (4) Auftragsverarbeitungsvertrag mit externen Dienstleistern.</p>
+<summary data-t="dsum"></summary>
+<div data-t="dbody"></div>
 </details>
 
-<h2 class="noprint">Schritt 1 — Bestandsaufnahme</h2>
+<h2 class="noprint" data-t="h2a"></h2>
 <div class="werkbar noprint">
-  <span><label>Werk / Standort</label> <input class="w" id="werk" placeholder="z. B. Werk Hannover" oninput="state.werk=this.value;renderPlan()"></span>
-  <span><label>Datum</label> <input type="date" id="datum" onchange="state.datum=this.value;renderPlan()"></span>
+  <span><label data-t="lWerk"></label> <input class="w" id="werk" oninput="state.werk=this.value;renderPlan()"></span>
+  <span><label data-t="lDatum"></label> <input type="date" id="datum" onchange="state.datum=this.value;renderPlan()"></span>
 </div>
 <div id="questions" class="noprint"></div>
 
-<h2 class="noprint">Schritt 2 — Ihr individueller Fahrplan</h2>
-<p class="note noprint">Der Fahrplan markiert je Stufe den Status (erreicht / teilweise / offen) und liefert die passenden Vorlagen. Druckansicht erzeugt das vollständige PDF inklusive aller Vorlagen.</p>
+<h2 class="noprint" data-t="h2b"></h2>
+<p class="note noprint" data-t="noteb"></p>
 
 <div class="print-only" id="printHead"></div>
 <div id="plan"></div>
 
 <div class="toolbar noprint">
-  <button class="btn ghost" onclick="saveJSON()">Speichern (JSON)</button>
-  <button class="btn ghost" onclick="document.getElementById('file').click()">Laden (JSON)</button>
+  <button class="btn ghost" onclick="saveJSON()" data-t="bsave"></button>
+  <button class="btn ghost" onclick="document.getElementById('file').click()" data-t="bload"></button>
   <input type="file" id="file" accept=".json" style="display:none" onchange="loadJSON(event)">
-  <button class="btn ghost" onclick="downloadRegisterCSV()">Register-Vorlage (CSV)</button>
-  <button class="btn" onclick="window.print()">Fahrplan drucken / PDF</button>
+  <button class="btn ghost" onclick="downloadRegisterCSV()" data-t="bcsv"></button>
+  <button class="btn" onclick="window.print()" data-t="bprint"></button>
 </div>
 
-<footer class="noprint">
-  Methodik nach „ISMS für die Industrie“, Kap. 22.2. Audit-Bezug: ISO 27001 Controls 5.19 (Lieferanten), 8.5 (sichere Authentisierung), 8.16 (Monitoring); IT-Grundschutz IND.3.2 (Fernwartung).
-  Just-in-Time bedeutet: Zugänge sind im Ruhezustand deaktiviert und werden nur zeitlich begrenzt aktiviert.<br>
-  Die Vorlagen sind Formulierungshilfen, keine Rechtsberatung. Betriebsvereinbarung und Auftragsverarbeitungsvertrag sind vor Verwendung durch Recht, Datenschutz und Betriebsrat zu prüfen.<br>
-  <span class="sig">§</span> Sabine Frömling — Independent OT-Security &amp; Compliance Advisory.
-</footer>
+<footer class="noprint" data-t="foot"></footer>
 </div>
 
 <script>
-/* ---- Fragen (Kap. 22.2) ---- */
+/* ---- Fragen: kanonische DE-Optionswerte (Speicher- & Logik-Schlüssel), Anzeige übersetzt ---- */
 const QUESTIONS=[
-  {key:"register",q:"Existiert ein vollständiges Fernwartungsregister (alle Zugänge mit Owner)?",
-   opts:["Ja, vollständig","Teilweise","Nein"]},
-  {key:"access",q:"Wie werden Fernwartungszugänge verwaltet?",
-   opts:["Ticket-System mit Genehmigung","E-Mail-Anfrage","Informell / telefonisch","Kein definierter Prozess"]},
-  {key:"oem",q:"Gibt es dauerhafte VPN-Tunnel von OEMs / Herstellern?",
-   opts:["Nein, keine dauerhaften","Einzelne","Ja, mehrere dauerhafte"]},
-  {key:"gateway",q:"Gibt es ein zentrales Fernwartungs-Gateway?",
-   opts:["Ja, zentral","Teilweise / mehrere Wege","Nein"]},
-  {key:"mfa",q:"Ist MFA am Fernwartungs-Gateway erzwungen?",
-   opts:["Ja","Nein"]},
-  {key:"recording",q:"Wird Session-Recording eingesetzt?",
-   opts:["Ja, alle Sessions","Nur Crown-Jewel-Systeme","Nein"]},
-  {key:"konstellation",q:"Welche Personen werden bei Fernwartung aufgezeichnet? (für die Rechtslage entscheidend)",
-   opts:["Rein externe OEM-Wartung","Gemischt: extern + internes Personal","Unklar / nicht geprüft"]}
+  {key:"register",opts:["Ja, vollständig","Teilweise","Nein"]},
+  {key:"access",opts:["Ticket-System mit Genehmigung","E-Mail-Anfrage","Informell / telefonisch","Kein definierter Prozess"]},
+  {key:"oem",opts:["Nein, keine dauerhaften","Einzelne","Ja, mehrere dauerhafte"]},
+  {key:"gateway",opts:["Ja, zentral","Teilweise / mehrere Wege","Nein"]},
+  {key:"mfa",opts:["Ja","Nein"]},
+  {key:"recording",opts:["Ja, alle Sessions","Nur Crown-Jewel-Systeme","Nein"]},
+  {key:"konstellation",opts:["Rein externe OEM-Wartung","Gemischt: extern + internes Personal","Unklar / nicht geprüft"]}
 ];
+const OPT_EN={
+"Ja, vollständig":"Yes, complete","Teilweise":"Partially","Nein":"No",
+"Ticket-System mit Genehmigung":"Ticket system with approval","E-Mail-Anfrage":"Email request","Informell / telefonisch":"Informal / by phone","Kein definierter Prozess":"No defined process",
+"Nein, keine dauerhaften":"No, none permanent","Einzelne":"A few","Ja, mehrere dauerhafte":"Yes, several permanent",
+"Ja, zentral":"Yes, central","Teilweise / mehrere Wege":"Partially / several paths",
+"Ja":"Yes","Ja, alle Sessions":"Yes, all sessions","Nur Crown-Jewel-Systeme":"Crown-jewel systems only",
+"Rein externe OEM-Wartung":"Purely external OEM maintenance","Gemischt: extern + internes Personal":"Mixed: external + internal staff","Unklar / nicht geprüft":"Unclear / not assessed"
+};
+const opt=v=>lang==="en"?(OPT_EN[v]||v):v;
+
+const TXT={
+de:{
+ title:"JIT-Fernwartungs-Fahrplan · Companion zum Buch",
+ kicker:"OT-Security · Companion zum Buch",
+ h1:"JIT-Fernwartungs-Fahrplan",
+ sub:"Fernwartung ist der häufigste Eintrittsvektor in der OT. Dieses Werkzeug erzeugt aus wenigen Angaben einen individuellen Fahrplan entlang des Vier-Stufen-Modells — <b>Inventar → Deaktivierung (Just-in-Time) → Single-Channel → Session-Recording</b> — inklusive Register-Vorlage, JIT-Checkliste, Richtlinien-Formulierung und Betriebsvereinbarungs-Muster. <span class='sig'>§</span> Alles bleibt im Browser.",
+ ref:"Methodik nach „ISMS für die Industrie\u201c, Kap. 22.2 (Vier-Stufen-Modell), 15.4 (Fernwartung/Jump-Host) und 26.6 (Verarbeitungsverzeichnis). Rechtsbezug: §87 Abs. 1 Nr. 6 BetrVG, DSGVO.",
+ dsum:"Das Vier-Stufen-Modell, die Voraussetzungen & die Rechtslage (lesen)",
+ dbody:"<p><b>Stufe 1 — Inventar:</b> Alle Fernwartungszugänge im Register erfassen (wer, welches System, seit wann, warum, welches Protokoll), jeweils mit eindeutiger ID und benanntem Owner.</p><p><b>Stufe 2 — Deaktivierung im Ruhezustand:</b> Zugänge standardmäßig deaktiviert; Aktivierung nur auf zeitlich begrenzten Antrag, automatische Deaktivierung nach Auftragsende (Just-in-Time).</p><p><b>Stufe 3 — Single-Channel:</b> Nur ein genehmigter Weg über das zentrale, protokollierte Gateway — kein direktes RDP, kein eigenständiges Hersteller-VPN, keine Schatten-Tools.</p><p><b>Stufe 4 — Session-Recording:</b> Vollständige Aufzeichnung jeder Session, Aufbewahrung mindestens 90 Tage, Zugriff nur durch OT-Security-Team, im Vorfall durch Forensik.</p><p><b>Voraussetzungen (Kap. 22.2):</b> zentrales Gateway mit MFA, Genehmigungs-Workflow, Recording-Infrastruktur, Schulung der externen Dienstleister. Die Investition rechnet sich erfahrungsgemäß in 12–24 Monaten.</p><p><b>Rechtslage (häufigster Fehler):</b> Session-Recording wird eingeführt, ohne die personenbezogene Konstellation zu klären. Korrekte Reihenfolge: (1) Datenströme klären (rein OEM oder gemischt mit internem Personal), (2) Aufnahme ins Verarbeitungsverzeichnis, (3) Betriebsvereinbarung <i>nur sofern interne Mitarbeiter erfasst werden</i> (§87 Abs. 1 Nr. 6 BetrVG), (4) Auftragsverarbeitungsvertrag mit externen Dienstleistern.</p>",
+ h2a:"Schritt 1 — Bestandsaufnahme",
+ lWerk:"Werk / Standort",phWerk:"z. B. Werk Hannover",lDatum:"Datum",
+ h2b:"Schritt 2 — Ihr individueller Fahrplan",
+ noteb:"Der Fahrplan markiert je Stufe den Status (erreicht / teilweise / offen) und liefert die passenden Vorlagen. Druckansicht erzeugt das vollständige PDF inklusive aller Vorlagen.",
+ bsave:"Speichern (JSON)",bload:"Laden (JSON)",bcsv:"Register-Vorlage (CSV)",bprint:"Fahrplan drucken / PDF",
+ foot:"Methodik nach „ISMS für die Industrie\u201c, Kap. 22.2. Audit-Bezug: ISO 27001 Controls 5.19 (Lieferanten), 8.5 (sichere Authentisierung), 8.16 (Monitoring); IT-Grundschutz IND.3.2 (Fernwartung). Just-in-Time bedeutet: Zugänge sind im Ruhezustand deaktiviert und werden nur zeitlich begrenzt aktiviert.<br>Die Vorlagen sind Formulierungshilfen, keine Rechtsberatung. Betriebsvereinbarung und Auftragsverarbeitungsvertrag sind vor Verwendung durch Recht, Datenschutz und Betriebsrat zu prüfen.<br><span class='sig'>§</span> Sabine Frömling — Independent OT-Security &amp; Compliance Advisory.",
+ q:{register:"Existiert ein vollständiges Fernwartungsregister (alle Zugänge mit Owner)?",access:"Wie werden Fernwartungszugänge verwaltet?",oem:"Gibt es dauerhafte VPN-Tunnel von OEMs / Herstellern?",gateway:"Gibt es ein zentrales Fernwartungs-Gateway?",mfa:"Ist MFA am Fernwartungs-Gateway erzwungen?",recording:"Wird Session-Recording eingesetzt?",konstellation:"Welche Personen werden bei Fernwartung aufgezeichnet? (für die Rechtslage entscheidend)"},
+ status:{erreicht:"Erreicht",teilweise:"Teilweise",offen:"Offen",none:"—"},
+ stages:["Inventar","Deaktivierung im Ruhezustand (Just-in-Time)","Single-Channel-Prinzip","Session-Recording"],
+ stagesShort:["Inventar","Deaktivierung (JIT)","Single-Channel","Session-Recording"],
+ stufe:"Stufe",
+ nextFill:"Bestandsaufnahme oben ausfüllen",nextDone:"Alle vier Stufen erreicht — Nachweise aktuell halten",nextStep:(n,name)=>`Nächster Schritt: Stufe ${n} — ${name}`,
+ planTitle:w=>`Fahrplan ${w}`,printTitle:"JIT-Fernwartungs-Fahrplan",werkPh:"[Werkname]",
+ gap1:{ok:"Register vorhanden. Halten Sie es aktuell und prüfen Sie jeden Eintrag auf benannten Owner, Zweck und Ablaufdatum.",part:"Register unvollständig. Ergänzen Sie fehlende Zugänge — insbesondere herstellerseitige und historisch gewachsene — und weisen Sie jedem Eintrag eine ID und einen benannten Owner zu.",no:"<b>Startpunkt.</b> Erfassen Sie alle existierenden Fernwartungszugänge in der untenstehenden Register-Vorlage. Ohne vollständiges Inventar sind die folgenden Stufen nicht belastbar.",na:"Noch nicht bewertet."},
+ gap2:{oemMany:"<b>Dauerhafte OEM-Tunnel sind das zentrale Anti-Muster.</b> Inventarisieren, kündigen oder auf Just-in-Time umstellen.",oemFew:"Einzelne dauerhafte Tunnel verbleiben — auf JIT-Aktivierung umstellen.",mail:"Zugangsvergabe per E-Mail ist nicht nachvollziehbar genug; auf ein Ticket-System mit Genehmigung durch den Asset Owner umstellen.",none:"<b>Kein nachvollziehbarer Vergabeprozess.</b> Genehmigungs-Workflow mit Asset Owner als Genehmiger einführen.",ok:"Zugänge im Ruhezustand deaktiviert und nur zeitlich begrenzt aktiviert — JIT-Prinzip etabliert. Checkliste zur Bestätigung durchgehen."},
+ gap3:{noGw:"<b>Kein zentrales Gateway.</b> Ein zentraler, protokollierter Fernwartungsweg (Jump-Host/Gateway) ist die Voraussetzung für das Single-Channel-Prinzip.",multi:"Mehrere Wege bestehen parallel. Konsolidieren Sie auf einen genehmigten Kanal und unterbinden Sie Schatten-Zugänge.",noMfa:"MFA am Gateway fehlt — für privilegierte Fernzugriffe verpflichtend (NIS2 §30 Abs. 2 Nr. 10).",ok:"Zentrales Gateway mit MFA vorhanden, keine dauerhaften Hersteller-Tunnel. Verankern Sie das Prinzip in der Richtlinie unten und verpflichten Sie Dienstleister vertraglich darauf."},
+ gap4:{all:"Recording flächendeckend aktiv. Prüfen Sie Aufbewahrung (mind. 90 Tage), Zugriffsbeschränkung auf das OT-Security-Team und die Rechtsgrundlage (siehe unten).",cj:"Recording auf Crown-Jewel-Systeme begrenzt — ein vertretbarer risikobasierter Einstieg. Vor der Ausweitung die Rechtslage klären (siehe unten).",no:"Kein Recording. Vor Einführung zwingend zuerst die personenbezogene Konstellation und Rechtsgrundlage klären — nicht umgekehrt.",na:"Noch nicht bewertet."},
+ legal:{seq:"<b>Rechtliche Reihenfolge (Kap. 22.2):</b> (1) personenbezogene Datenströme klären → (2) Aufnahme ins Verarbeitungsverzeichnis (Kap. 26.6) → (3) Betriebsvereinbarung, sofern interne Mitarbeiter erfasst → (4) Auftragsverarbeitungsvertrag mit externen Dienstleistern.",
+  mixed:"<b>Betriebsvereinbarung erforderlich.</b> Es werden interne Mitarbeiter mitaufgezeichnet — der Mitbestimmungstatbestand nach §87 Abs. 1 Nr. 6 BetrVG ist erfüllt. Zusätzlich Auftragsverarbeitungsvertrag mit den externen Dienstleistern und Eintrag ins Verarbeitungsverzeichnis.",
+  oem:"Keine Betriebsvereinbarung erforderlich, solange ausschließlich externe OEM-Techniker aufgezeichnet werden (kein Mitbestimmungstatbestand). Erforderlich bleiben Auftragsverarbeitungsvertrag mit den Dienstleistern und Eintrag ins Verarbeitungsverzeichnis. Sobald interne Mitarbeiter in Kombi-Sessions erfasst werden, wird die Betriebsvereinbarung nachzuholen sein.",
+  unclear:"<b>Zuerst die Konstellation klären — das ist der häufigste Fehler.</b> Solange unklar ist, ob interne Mitarbeiter mitaufgezeichnet werden, fehlt die Rechtsgrundlage. Recording erst aktivieren, nachdem die personenbezogenen Datenströme geklärt sind.",
+  none:"Beantworten Sie die Frage zur aufgezeichneten Personengruppe, um die rechtliche Einordnung zu erhalten."},
+ tRegister:"Vorlage · Fernwartungsregister",tCsv:"CSV laden",tRegisterNote:"Jeder Zugang erhält eine eindeutige ID und einen benannten internen Owner (Kap. 22.2, Stufe 1).",
+ tCheck:"Checkliste · Just-in-Time-Einführung",
+ tPolicy:"Formulierungshilfe · Richtlinie gegen Schatten-IT",tCopy:"Kopieren",tCopied:"Kopiert ✓",
+ tBv:"Muster · Betriebsvereinbarung Session-Recording",
+ tBvDisc:"Muster / Formulierungshilfe, keine Rechtsberatung. Vor Verwendung durch Recht, Datenschutz und Betriebsrat zu prüfen und an die konkrete Konstellation anzupassen.",
+ deNote:"",
+ tAudit:"Audit-Nachweise (ISO / IT-Grundschutz)",auditTh:["Prüfpunkt","ISO","IT-Grundschutz"],
+ audit:[["Inventar aller Fernwartungszugänge mit Owner","5.19","IND.3.2.A1"],["Just-in-Time-Aktivierung statt dauerhafter Tunnel","5.19","IND.3.2.A4"],["Single-Channel-Prinzip — keine Schatten-Tools","5.19","IND.3.2.A2"],["MFA an Fernwartungs-Gateways","8.5","IND.3.2.A4"],["Session-Recording bei Crown-Jewel-Zugriffen","8.16","IND.3.2.A6"]],
+ csvHead:["ID","System / Asset","Dienstleister / OEM","Zugangsart / Protokoll","Owner (intern)","Zweck","Aktiv seit","JIT (ja/nein)","MFA (ja/nein)","Session-Recording (ja/nein)","Letzte Nutzung","Nächstes Review / Ablauf"],
+ csvRows:[["FW-001","SCADA-Master Linie A","Siemens (OEM)","Gateway / RDP über Jump-Host","OT-Leitung","Störungsbehebung Leitsystem","2024-03-01","ja","ja","ja","2026-04-12","2026-09-01"],["FW-002","Schutzrelais Schaltanlage Nord","Hersteller X","Gateway / herstellerspez. Protokoll","Instandhaltung","Firmware-Wartung","2023-11-15","ja","ja","nur Crown-Jewel","2026-05-20","2026-08-01"]],
+ csvName:"fernwartungsregister-vorlage.csv",
+ check:["Alle Fernwartungszugänge im Ruhezustand standardmäßig deaktiviert.","Aktivierung nur auf expliziten, zeitlich begrenzten Antrag (Start- und Endzeitpunkt).","Genehmiger ist der benannte Asset Owner, nicht die IT-Hotline.","Techniker kündigt den Zugriff vor Aktivierung an.","Automatische Deaktivierung bei Auftragsende oder Fristablauf.","Dauerhafte OEM-VPN-Tunnel inventarisiert, gekündigt oder auf JIT umgestellt.","Notfall-Zugang dokumentiert, mit Vier-Augen-Aktivierung.","Service-Konten regelmäßig auf Aktivität geprüft, ungenutzte deaktiviert."],
+ notRead:"Datei nicht lesbar."
+},
+en:{
+ title:"JIT Remote Maintenance Roadmap · Book companion",
+ kicker:"OT Security · Book companion",
+ h1:"JIT Remote Maintenance Roadmap",
+ sub:"Remote maintenance is the most common entry vector into OT. From a few inputs, this tool generates an individual roadmap along the four-stage model — <b>inventory → deactivation at rest (just-in-time) → single channel → session recording</b> — including a register template, JIT checklist, policy wording and a works-agreement template. <span class='sig'>§</span> Everything stays in your browser.",
+ ref:"Methodology per \u201cISMS für die Industrie\u201d, ch. 22.2 (four-stage model), 15.4 (remote maintenance/jump host) and 26.6 (record of processing activities). Legal basis (Germany): §87(1) no. 6 BetrVG, GDPR.",
+ dsum:"The four-stage model, the prerequisites & the legal situation (read me)",
+ dbody:"<p><b>Stage 1 — Inventory:</b> record all remote access paths in the register (who, which system, since when, why, which protocol), each with a unique ID and a named owner.</p><p><b>Stage 2 — Deactivation at rest:</b> access disabled by default; activation only on a time-limited request, automatic deactivation when the job ends (just-in-time).</p><p><b>Stage 3 — Single channel:</b> only one approved path via the central, logged gateway — no direct RDP, no standalone vendor VPN, no shadow tools.</p><p><b>Stage 4 — Session recording:</b> full recording of every session, retention at least 90 days, access only by the OT security team, in an incident also by forensics.</p><p><b>Prerequisites (ch. 22.2):</b> central gateway with MFA, approval workflow, recording infrastructure, training of external service providers. Experience shows the investment pays back within 12–24 months.</p><p><b>Legal situation (most common mistake — Germany):</b> session recording is introduced without clarifying the personal-data constellation. Correct sequence: (1) clarify data flows (purely OEM, or mixed with internal staff), (2) entry in the record of processing activities, (3) works agreement <i>only if internal employees are captured</i> (§87(1) no. 6 BetrVG, the German Works Constitution Act), (4) data processing agreement with external service providers. Outside Germany, check the local co-determination and privacy rules accordingly.</p>",
+ h2a:"Step 1 — Current-state assessment",
+ lWerk:"Plant / site",phWerk:"e.g. Hanover plant",lDatum:"Date",
+ h2b:"Step 2 — Your individual roadmap",
+ noteb:"The roadmap marks each stage's status (achieved / partial / open) and provides the matching templates. The print view produces the complete PDF including all templates.",
+ bsave:"Save (JSON)",bload:"Load (JSON)",bcsv:"Register template (CSV)",bprint:"Print roadmap / PDF",
+ foot:"Methodology per \u201cISMS für die Industrie\u201d, ch. 22.2. Audit references: ISO 27001 controls 5.19 (suppliers), 8.5 (secure authentication), 8.16 (monitoring); German IT-Grundschutz IND.3.2 (remote maintenance). Just-in-time means: access is disabled at rest and only activated for a limited time.<br>The templates are drafting aids, not legal advice. The works agreement and the data processing agreement are Germany-specific instruments; have them reviewed by legal, data protection and the works council before use.<br><span class='sig'>§</span> Sabine Frömling — Independent OT Security &amp; Compliance Advisory.",
+ q:{register:"Does a complete remote maintenance register exist (all access paths with owners)?",access:"How is remote maintenance access managed?",oem:"Are there permanent VPN tunnels from OEMs / vendors?",gateway:"Is there a central remote maintenance gateway?",mfa:"Is MFA enforced at the remote maintenance gateway?",recording:"Is session recording in use?",konstellation:"Whose sessions are recorded during remote maintenance? (decisive for the legal situation)"},
+ status:{erreicht:"Achieved",teilweise:"Partial",offen:"Open",none:"—"},
+ stages:["Inventory","Deactivation at rest (just-in-time)","Single-channel principle","Session recording"],
+ stagesShort:["Inventory","Deactivation (JIT)","Single channel","Session recording"],
+ stufe:"Stage",
+ nextFill:"Complete the assessment above",nextDone:"All four stages achieved — keep the evidence current",nextStep:(n,name)=>`Next step: stage ${n} — ${name}`,
+ planTitle:w=>`Roadmap ${w}`,printTitle:"JIT Remote Maintenance Roadmap",werkPh:"[plant name]",
+ gap1:{ok:"Register in place. Keep it current and check every entry for a named owner, purpose and expiry date.",part:"Register incomplete. Add missing access paths — especially vendor-side and historically grown ones — and assign each entry an ID and a named owner.",no:"<b>Starting point.</b> Record all existing remote access paths in the register template below. Without a complete inventory, the following stages are not reliable.",na:"Not yet assessed."},
+ gap2:{oemMany:"<b>Permanent OEM tunnels are the central anti-pattern.</b> Inventory them, terminate them or convert them to just-in-time.",oemFew:"A few permanent tunnels remain — convert them to JIT activation.",mail:"Granting access by email is not traceable enough; switch to a ticket system with approval by the asset owner.",none:"<b>No traceable granting process.</b> Introduce an approval workflow with the asset owner as approver.",ok:"Access disabled at rest and only activated for a limited time — the JIT principle is established. Walk through the checklist to confirm."},
+ gap3:{noGw:"<b>No central gateway.</b> A central, logged remote maintenance path (jump host/gateway) is the precondition for the single-channel principle.",multi:"Several paths exist in parallel. Consolidate to one approved channel and shut down shadow access.",noMfa:"MFA at the gateway is missing — mandatory for privileged remote access (NIS2; German transposition: §30(2) no. 10 BSIG).",ok:"Central gateway with MFA in place, no permanent vendor tunnels. Anchor the principle in the policy below and bind service providers to it contractually."},
+ gap4:{all:"Recording is active across the board. Check retention (at least 90 days), access restriction to the OT security team and the legal basis (see below).",cj:"Recording limited to crown-jewel systems — a defensible risk-based start. Clarify the legal situation before extending it (see below).",no:"No recording. Before introduction, first clarify the personal-data constellation and legal basis — not the other way round.",na:"Not yet assessed."},
+ legal:{seq:"<b>Legal sequence (ch. 22.2 — German law):</b> (1) clarify personal data flows → (2) entry in the record of processing activities (ch. 26.6) → (3) works agreement if internal employees are captured → (4) data processing agreement with external service providers. Outside Germany, map these steps to your local co-determination and privacy regime.",
+  mixed:"<b>Works agreement required (Germany).</b> Internal employees are being recorded — the co-determination trigger under §87(1) no. 6 BetrVG is met. Additionally: data processing agreement with the external service providers and entry in the record of processing activities.",
+  oem:"No works agreement required as long as only external OEM technicians are recorded (no co-determination trigger). Still required: data processing agreement with the service providers and entry in the record of processing activities. As soon as internal employees are captured in combined sessions, the works agreement becomes necessary.",
+  unclear:"<b>Clarify the constellation first — this is the most common mistake.</b> As long as it is unclear whether internal employees are being recorded, the legal basis is missing. Activate recording only after the personal data flows have been clarified.",
+  none:"Answer the question about whose sessions are recorded to obtain the legal assessment."},
+ tRegister:"Template · Remote maintenance register",tCsv:"Download CSV",tRegisterNote:"Each access path receives a unique ID and a named internal owner (ch. 22.2, stage 1).",
+ tCheck:"Checklist · Just-in-time introduction",
+ tPolicy:"Drafting aid · Policy against shadow IT (German-language template)",tCopy:"Copy",tCopied:"Copied ✓",
+ tBv:"Template · Works agreement on session recording (German legal instrument)",
+ tBvDisc:"Template / drafting aid, not legal advice. The works agreement is an instrument of German labour law (§87(1) no. 6 BetrVG) and is therefore provided in German, as it must be concluded in German with the works council. Have it reviewed by legal, data protection and the works council and adapt it to the specific constellation.",
+ deNote:"Note: the following template is provided in German — it is a German legal instrument and is concluded in German.",
+ tAudit:"Audit evidence (ISO / German IT-Grundschutz)",auditTh:["Checkpoint","ISO","IT-Grundschutz"],
+ audit:[["Inventory of all remote access paths with owners","5.19","IND.3.2.A1"],["Just-in-time activation instead of permanent tunnels","5.19","IND.3.2.A4"],["Single-channel principle — no shadow tools","5.19","IND.3.2.A2"],["MFA at remote maintenance gateways","8.5","IND.3.2.A4"],["Session recording for crown-jewel access","8.16","IND.3.2.A6"]],
+ csvHead:["ID","System / asset","Service provider / OEM","Access type / protocol","Owner (internal)","Purpose","Active since","JIT (yes/no)","MFA (yes/no)","Session recording (yes/no)","Last use","Next review / expiry"],
+ csvRows:[["RM-001","SCADA master line A","Siemens (OEM)","Gateway / RDP via jump host","OT management","Control system troubleshooting","2024-03-01","yes","yes","yes","2026-04-12","2026-09-01"],["RM-002","Protective relay switchgear north","Vendor X","Gateway / vendor-specific protocol","Maintenance","Firmware maintenance","2023-11-15","yes","yes","crown-jewel only","2026-05-20","2026-08-01"]],
+ csvName:"remote-maintenance-register-template.csv",
+ check:["All remote access paths disabled by default at rest.","Activation only on an explicit, time-limited request (start and end time).","The approver is the named asset owner, not the IT hotline.","The technician announces the access before activation.","Automatic deactivation when the job ends or the deadline expires.","Permanent OEM VPN tunnels inventoried, terminated or converted to JIT.","Emergency access documented, with four-eyes activation.","Service accounts regularly checked for activity; unused ones disabled."],
+ notRead:"File not readable."
+}};
+let lang="de";
+const L=()=>TXT[lang];
 
 let state={};
 function initState(){state={werk:"",datum:todayISO(),ans:{}};QUESTIONS.forEach(q=>state.ans[q.key]=null);}
 function todayISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-function fmtDate(iso){if(!iso)return '';const p=String(iso).split('-');return p.length===3?p[2]+'.'+p[1]+'.'+p[0]:iso;}
+function fmtDate(iso){if(!iso)return '';const p=String(iso).split('-');if(p.length!==3)return iso;return lang==="en"?p[0]+'-'+p[1]+'-'+p[2]:p[2]+'.'+p[1]+'.'+p[0];}
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
-function werkName(){return (state.werk&&state.werk.trim())?state.werk.trim():'[Werkname]';}
+function werkName(){return (state.werk&&state.werk.trim())?state.werk.trim():L().werkPh;}
 
-/* ---- Fragen-Rendering ---- */
+/* ---- statisches i18n ---- */
+function applyLang(){
+  document.documentElement.lang=lang;
+  document.title=L().title;
+  document.querySelectorAll("[data-t]").forEach(el=>el.innerHTML=L()[el.dataset.t]);
+  document.getElementById("werk").placeholder=L().phWerk;
+  document.getElementById("lde").classList.toggle("on",lang==="de");
+  document.getElementById("len").classList.toggle("on",lang==="en");
+}
+function setLang(l){lang=l;try{const u=new URL(location);u.searchParams.set('lang',l);history.replaceState(null,'',u);}catch(e){}applyLang();renderQuestions();renderPlan();}
+
+/* ---- Fragen-Rendering (kanonische DE-Werte, übersetzte Anzeige) ---- */
 function renderQuestions(){
   const wrap=document.getElementById('questions');wrap.innerHTML='';
   QUESTIONS.forEach(q=>{
     const div=document.createElement('div');div.className='q';
-    let h=`<div class="qt">${esc(q.q)}</div><div class="opts">`;
+    let h=`<div class="qt">${esc(L().q[q.key])}</div><div class="opts">`;
     q.opts.forEach(o=>{const sel=state.ans[q.key]===o?' sel':'';
-      h+=`<span class="opt${sel}" onclick="setAns('${q.key}','${esc(o).replace(/'/g,"\\'")}')">${esc(o)}</span>`;});
+      h+=`<span class="opt${sel}" onclick="setAns('${q.key}','${esc(o).replace(/'/g,"\\'")}')">${esc(opt(o))}</span>`;});
     h+=`</div>`;div.innerHTML=h;wrap.appendChild(div);
   });
 }
 function setAns(k,v){state.ans[k]=v;renderQuestions();renderPlan();}
 
-/* ---- Status-Logik je Stufe ---- */
-function statusInfo(s){return s==='erreicht'?{c:'var(--ok)',l:'Erreicht'}:(s==='teilweise'?{c:'var(--teil)',l:'Teilweise'}:(s==='offen'?{c:'var(--offen)',l:'Offen'}:{c:'var(--muted)',l:'—'}));}
+/* ---- Status-Logik (kanonische DE-Werte) ---- */
+function statusInfo(s){const T=L().status;return s==='erreicht'?{c:'var(--ok)',l:T.erreicht}:(s==='teilweise'?{c:'var(--teil)',l:T.teilweise}:(s==='offen'?{c:'var(--offen)',l:T.offen}:{c:'var(--muted)',l:T.none}));}
 function stage1Status(){const r=state.ans.register;if(!r)return null;return r==='Ja, vollständig'?'erreicht':(r==='Teilweise'?'teilweise':'offen');}
 function stage2Status(){const o=state.ans.oem,a=state.ans.access;if(!o||!a)return null;
   if(o==='Nein, keine dauerhaften'&&a==='Ticket-System mit Genehmigung')return 'erreicht';
@@ -185,48 +285,33 @@ function stage3Status(){const g=state.ans.gateway,m=state.ans.mfa,o=state.ans.oe
 function stage4Status(){const r=state.ans.recording;if(!r)return null;return r==='Ja, alle Sessions'?'erreicht':(r==='Nur Crown-Jewel-Systeme'?'teilweise':'offen');}
 
 /* ---- Personalisierte Lücken-Hinweise ---- */
-function gap1(){const r=state.ans.register;
-  if(r==='Ja, vollständig')return 'Register vorhanden. Halten Sie es aktuell und prüfen Sie jeden Eintrag auf benannten Owner, Zweck und Ablaufdatum.';
-  if(r==='Teilweise')return 'Register unvollständig. Ergänzen Sie fehlende Zugänge — insbesondere herstellerseitige und historisch gewachsene — und weisen Sie jedem Eintrag eine ID und einen benannten Owner zu.';
-  if(r==='Nein')return '<b>Startpunkt.</b> Erfassen Sie alle existierenden Fernwartungszugänge in der untenstehenden Register-Vorlage. Ohne vollständiges Inventar sind die folgenden Stufen nicht belastbar.';
-  return 'Noch nicht bewertet.';}
-function gap2(){const o=state.ans.oem,a=state.ans.access;
+function gap1(){const r=state.ans.register,T=L().gap1;
+  if(r==='Ja, vollständig')return T.ok;
+  if(r==='Teilweise')return T.part;
+  if(r==='Nein')return T.no;
+  return T.na;}
+function gap2(){const o=state.ans.oem,a=state.ans.access,T=L().gap2;
   let t=[];
-  if(o==='Ja, mehrere dauerhafte')t.push('<b>Dauerhafte OEM-Tunnel sind das zentrale Anti-Muster.</b> Inventarisieren, kündigen oder auf Just-in-Time umstellen.');
-  else if(o==='Einzelne')t.push('Einzelne dauerhafte Tunnel verbleiben — auf JIT-Aktivierung umstellen.');
-  if(a==='E-Mail-Anfrage')t.push('Zugangsvergabe per E-Mail ist nicht nachvollziehbar genug; auf ein Ticket-System mit Genehmigung durch den Asset Owner umstellen.');
-  if(a==='Informell / telefonisch'||a==='Kein definierter Prozess')t.push('<b>Kein nachvollziehbarer Vergabeprozess.</b> Genehmigungs-Workflow mit Asset Owner als Genehmiger einführen.');
-  if(!t.length)t.push('Zugänge im Ruhezustand deaktiviert und nur zeitlich begrenzt aktiviert — JIT-Prinzip etabliert. Checkliste zur Bestätigung durchgehen.');
+  if(o==='Ja, mehrere dauerhafte')t.push(T.oemMany);
+  else if(o==='Einzelne')t.push(T.oemFew);
+  if(a==='E-Mail-Anfrage')t.push(T.mail);
+  if(a==='Informell / telefonisch'||a==='Kein definierter Prozess')t.push(T.none);
+  if(!t.length)t.push(T.ok);
   return t.join(' ');}
-function gap3(){const g=state.ans.gateway,m=state.ans.mfa;
+function gap3(){const g=state.ans.gateway,m=state.ans.mfa,T=L().gap3;
   let t=[];
-  if(g==='Nein')t.push('<b>Kein zentrales Gateway.</b> Ein zentraler, protokollierter Fernwartungsweg (Jump-Host/Gateway) ist die Voraussetzung für das Single-Channel-Prinzip.');
-  else if(g==='Teilweise / mehrere Wege')t.push('Mehrere Wege bestehen parallel. Konsolidieren Sie auf einen genehmigten Kanal und unterbinden Sie Schatten-Zugänge.');
-  if(m==='Nein')t.push('MFA am Gateway fehlt — für privilegierte Fernzugriffe verpflichtend (NIS2 §30 Abs. 2 Nr. 10).');
-  if(!t.length)t.push('Zentrales Gateway mit MFA vorhanden, keine dauerhaften Hersteller-Tunnel. Verankern Sie das Prinzip in der Richtlinie unten und verpflichten Sie Dienstleister vertraglich darauf.');
+  if(g==='Nein')t.push(T.noGw);
+  else if(g==='Teilweise / mehrere Wege')t.push(T.multi);
+  if(m==='Nein')t.push(T.noMfa);
+  if(!t.length)t.push(T.ok);
   return t.join(' ');}
-function gap4(){const r=state.ans.recording;
-  if(r==='Ja, alle Sessions')return 'Recording flächendeckend aktiv. Prüfen Sie Aufbewahrung (mind. 90 Tage), Zugriffsbeschränkung auf das OT-Security-Team und die Rechtsgrundlage (siehe unten).';
-  if(r==='Nur Crown-Jewel-Systeme')return 'Recording auf Crown-Jewel-Systeme begrenzt — ein vertretbarer risikobasierter Einstieg. Vor der Ausweitung die Rechtslage klären (siehe unten).';
-  if(r==='Nein')return 'Kein Recording. Vor Einführung zwingend zuerst die personenbezogene Konstellation und Rechtsgrundlage klären — nicht umgekehrt.';
-  return 'Noch nicht bewertet.';}
+function gap4(){const r=state.ans.recording,T=L().gap4;
+  if(r==='Ja, alle Sessions')return T.all;
+  if(r==='Nur Crown-Jewel-Systeme')return T.cj;
+  if(r==='Nein')return T.no;
+  return T.na;}
 
-/* ---- Vorlagen ---- */
-const CSV_HEAD=["ID","System / Asset","Dienstleister / OEM","Zugangsart / Protokoll","Owner (intern)","Zweck","Aktiv seit","JIT (ja/nein)","MFA (ja/nein)","Session-Recording (ja/nein)","Letzte Nutzung","Nächstes Review / Ablauf"];
-const CSV_ROWS=[
-  ["FW-001","SCADA-Master Linie A","Siemens (OEM)","Gateway / RDP über Jump-Host","OT-Leitung","Störungsbehebung Leitsystem","2024-03-01","ja","ja","ja","2026-04-12","2026-09-01"],
-  ["FW-002","Schutzrelais Schaltanlage Nord","Hersteller X","Gateway / herstellerspez. Protokoll","Instandhaltung","Firmware-Wartung","2023-11-15","ja","ja","nur Crown-Jewel","2026-05-20","2026-08-01"]
-];
-function stage2Checklist(){return [
-  "Alle Fernwartungszugänge im Ruhezustand standardmäßig deaktiviert.",
-  "Aktivierung nur auf expliziten, zeitlich begrenzten Antrag (Start- und Endzeitpunkt).",
-  "Genehmiger ist der benannte Asset Owner, nicht die IT-Hotline.",
-  "Techniker kündigt den Zugriff vor Aktivierung an.",
-  "Automatische Deaktivierung bei Auftragsende oder Fristablauf.",
-  "Dauerhafte OEM-VPN-Tunnel inventarisiert, gekündigt oder auf JIT umgestellt.",
-  "Notfall-Zugang dokumentiert, mit Vier-Augen-Aktivierung.",
-  "Service-Konten regelmäßig auf Aktivität geprüft, ungenutzte deaktiviert."
-];}
+/* ---- Vorlagen (Rechtsdokumente bewusst deutsch — deutsche Rechtsinstrumente) ---- */
 function policyText(){return `Richtlinie Fernwartung — Single-Channel-Prinzip (`+werkName()+`)
 
 1. Jede Fernwartung an OT-Systemen erfolgt ausschließlich über das zentrale,
@@ -289,73 +374,56 @@ Für das Unternehmen: ____________   Für den Betriebsrat: ____________`;}
 
 /* ---- Rechtslage Stufe 4 (konstellationsabhängig) ---- */
 function legalBlock(){
-  const k=state.ans.konstellation;
+  const k=state.ans.konstellation,T=L().legal;
   let need;
-  if(k==='Gemischt: extern + internes Personal'){
-    need='<b>Betriebsvereinbarung erforderlich.</b> Es werden interne Mitarbeiter mitaufgezeichnet — der Mitbestimmungstatbestand nach §87 Abs. 1 Nr. 6 BetrVG ist erfüllt. Zusätzlich Auftragsverarbeitungsvertrag mit den externen Dienstleistern und Eintrag ins Verarbeitungsverzeichnis.';
-  } else if(k==='Rein externe OEM-Wartung'){
-    need='Keine Betriebsvereinbarung erforderlich, solange ausschließlich externe OEM-Techniker aufgezeichnet werden (kein Mitbestimmungstatbestand). Erforderlich bleiben Auftragsverarbeitungsvertrag mit den Dienstleistern und Eintrag ins Verarbeitungsverzeichnis. Sobald interne Mitarbeiter in Kombi-Sessions erfasst werden, wird die Betriebsvereinbarung nachzuholen sein.';
-  } else if(k==='Unklar / nicht geprüft'){
-    need='<b>Zuerst die Konstellation klären — das ist der häufigste Fehler.</b> Solange unklar ist, ob interne Mitarbeiter mitaufgezeichnet werden, fehlt die Rechtsgrundlage. Recording erst aktivieren, nachdem die personenbezogenen Datenströme geklärt sind.';
-  } else {
-    need='Beantworten Sie die Frage zur aufgezeichneten Personengruppe, um die rechtliche Einordnung zu erhalten.';
-  }
-  return `<div class="legalbox"><b>Rechtliche Reihenfolge (Kap. 22.2):</b>
-    (1) personenbezogene Datenströme klären → (2) Aufnahme ins Verarbeitungsverzeichnis (Kap. 26.6) →
-    (3) Betriebsvereinbarung, sofern interne Mitarbeiter erfasst → (4) Auftragsverarbeitungsvertrag mit externen Dienstleistern.
-    <br><br>${need}</div>`;
+  if(k==='Gemischt: extern + internes Personal')need=T.mixed;
+  else if(k==='Rein externe OEM-Wartung')need=T.oem;
+  else if(k==='Unklar / nicht geprüft')need=T.unclear;
+  else need=T.none;
+  return `<div class="legalbox">${T.seq}<br><br>${need}</div>`;
 }
 
 /* ---- Fahrplan-Rendering ---- */
 function renderPlan(){
+  const T=L();
   const s1=stage1Status(),s2=stage2Status(),s3=stage3Status(),s4=stage4Status();
   const statuses=[s1,s2,s3,s4];
-  // Headline: nächste offene/teilweise Stufe
-  const names=["Inventar","Deaktivierung (JIT)","Single-Channel","Session-Recording"];
   let nextIdx=statuses.findIndex(x=>x!=='erreicht');
   let nextTxt;
-  if(statuses.every(x=>x===null))nextTxt='Bestandsaufnahme oben ausfüllen';
-  else if(nextIdx===-1)nextTxt='Alle vier Stufen erreicht — Nachweise aktuell halten';
-  else nextTxt='Nächster Schritt: Stufe '+(nextIdx+1)+' — '+names[nextIdx];
+  if(statuses.every(x=>x===null))nextTxt=T.nextFill;
+  else if(nextIdx===-1)nextTxt=T.nextDone;
+  else nextTxt=T.nextStep(nextIdx+1,T.stagesShort[nextIdx]);
 
-  const print=`<div class="headline"><span class="t">JIT-Fernwartungs-Fahrplan</span><span class="next">${esc(werkName())} · ${esc(fmtDate(state.datum))}</span></div>`;
+  const print=`<div class="headline"><span class="t">${T.printTitle}</span><span class="next">${esc(werkName())} · ${esc(fmtDate(state.datum))}</span></div>`;
   document.getElementById('printHead').innerHTML=print;
 
-  let h=`<div class="headline noprint"><span class="t">Fahrplan ${esc(werkName())}</span><span class="next">${esc(nextTxt)}</span></div>`;
+  let h=`<div class="headline noprint"><span class="t">${esc(T.planTitle(werkName()))}</span><span class="next">${esc(nextTxt)}</span></div>`;
 
-  // Stufe 1
-  h+=stageCard(1,"Inventar",s1,gap1(),`
-    <div class="tmpl"><div class="tmplhead"><span>Vorlage · Fernwartungsregister</span><button class="csvbtn noprint" onclick="downloadRegisterCSV()">CSV laden</button></div>
-    <div class="tmplbody"><div class="audit"><table><thead><tr>${CSV_HEAD.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead>
-    <tbody>${CSV_ROWS.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}
-    <tr>${CSV_HEAD.map(()=>`<td style="color:var(--muted)">…</td>`).join('')}</tr></tbody></table></div>
-    <div class="disc">Jeder Zugang erhält eine eindeutige ID und einen benannten internen Owner (Kap. 22.2, Stufe 1).</div></div></div>`);
+  h+=stageCard(1,T.stages[0],s1,gap1(),`
+    <div class="tmpl"><div class="tmplhead"><span>${T.tRegister}</span><button class="csvbtn noprint" onclick="downloadRegisterCSV()">${T.tCsv}</button></div>
+    <div class="tmplbody"><div class="audit"><table><thead><tr>${T.csvHead.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead>
+    <tbody>${T.csvRows.map(r=>`<tr>${r.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}
+    <tr>${T.csvHead.map(()=>`<td style="color:var(--muted)">…</td>`).join('')}</tr></tbody></table></div>
+    <div class="disc">${T.tRegisterNote}</div></div></div>`);
 
-  // Stufe 2
-  h+=stageCard(2,"Deaktivierung im Ruhezustand (Just-in-Time)",s2,gap2(),`
-    <div class="tmpl"><div class="tmplhead"><span>Checkliste · Just-in-Time-Einführung</span></div>
-    <div class="tmplbody"><ul>${stage2Checklist().map(x=>`<li>☐ ${esc(x)}</li>`).join('')}</ul></div></div>`);
+  h+=stageCard(2,T.stages[1],s2,gap2(),`
+    <div class="tmpl"><div class="tmplhead"><span>${T.tCheck}</span></div>
+    <div class="tmplbody"><ul>${T.check.map(x=>`<li>☐ ${esc(x)}</li>`).join('')}</ul></div></div>`);
 
-  // Stufe 3
-  h+=stageCard(3,"Single-Channel-Prinzip",s3,gap3(),`
-    <div class="tmpl"><div class="tmplhead"><span>Formulierungshilfe · Richtlinie gegen Schatten-IT</span><button class="copybtn noprint" onclick="copyText('pol')">Kopieren</button></div>
-    <div class="tmplbody"><pre id="pol">${esc(policyText())}</pre></div></div>`);
+  const deNote=T.deNote?`<div class="disc" style="margin-bottom:6px">${T.deNote}</div>`:"";
+  h+=stageCard(3,T.stages[2],s3,gap3(),`
+    <div class="tmpl"><div class="tmplhead"><span>${T.tPolicy}</span><button class="copybtn noprint" id="cpol" onclick="copyText('pol','cpol')">${T.tCopy}</button></div>
+    <div class="tmplbody">${deNote}<pre id="pol">${esc(policyText())}</pre></div></div>`);
 
-  // Stufe 4
-  h+=stageCard(4,"Session-Recording",s4,gap4(),
+  h+=stageCard(4,T.stages[3],s4,gap4(),
     legalBlock()+`
-    <div class="tmpl"><div class="tmplhead"><span>Muster · Betriebsvereinbarung Session-Recording</span><button class="copybtn noprint" onclick="copyText('bv')">Kopieren</button></div>
-    <div class="tmplbody"><pre id="bv">${esc(bvText())}</pre>
-    <div class="disc">Muster / Formulierungshilfe, keine Rechtsberatung. Vor Verwendung durch Recht, Datenschutz und Betriebsrat zu prüfen und an die konkrete Konstellation anzupassen.</div></div></div>`);
+    <div class="tmpl"><div class="tmplhead"><span>${T.tBv}</span><button class="copybtn noprint" id="cbv" onclick="copyText('bv','cbv')">${T.tCopy}</button></div>
+    <div class="tmplbody">${deNote}<pre id="bv">${esc(bvText())}</pre>
+    <div class="disc">${T.tBvDisc}</div></div></div>`);
 
-  // Audit-Nachweise
-  h+=`<div class="stage"><div class="stagehead"><span class="st">Audit-Nachweise (ISO / IT-Grundschutz)</span></div>
-    <div class="stagebody audit"><table><thead><tr><th>Prüfpunkt</th><th>ISO</th><th>IT-Grundschutz</th></tr></thead><tbody>
-    <tr><td>Inventar aller Fernwartungszugänge mit Owner</td><td>5.19</td><td>IND.3.2.A1</td></tr>
-    <tr><td>Just-in-Time-Aktivierung statt dauerhafter Tunnel</td><td>5.19</td><td>IND.3.2.A4</td></tr>
-    <tr><td>Single-Channel-Prinzip — keine Schatten-Tools</td><td>5.19</td><td>IND.3.2.A2</td></tr>
-    <tr><td>MFA an Fernwartungs-Gateways</td><td>8.5</td><td>IND.3.2.A4</td></tr>
-    <tr><td>Session-Recording bei Crown-Jewel-Zugriffen</td><td>8.16</td><td>IND.3.2.A6</td></tr>
+  h+=`<div class="stage"><div class="stagehead"><span class="st">${T.tAudit}</span></div>
+    <div class="stagebody audit"><table><thead><tr>${T.auditTh.map(x=>`<th>${x}</th>`).join('')}</tr></thead><tbody>
+    ${T.audit.map(r=>`<tr><td>${esc(r[0])}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join('')}
     </tbody></table></div></div>`;
 
   document.getElementById('plan').innerHTML=h;
@@ -363,23 +431,24 @@ function renderPlan(){
 function stageCard(n,title,status,gap,tmplHtml){
   const si=statusInfo(status);
   return `<div class="stage"><div class="stagehead">
-    <span class="sn">Stufe ${n}</span><span class="st">${esc(title)}</span>
+    <span class="sn">${L().stufe} ${n}</span><span class="st">${esc(title)}</span>
     <span class="pill" style="background:${si.c}">${si.l}</span></div>
     <div class="stagebody"><div class="gap">${gap}</div>${tmplHtml}</div></div>`;
 }
 
 /* ---- Aktionen ---- */
-function copyText(id){const el=document.getElementById(id);if(!el)return;
+function copyText(id,btnId){const el=document.getElementById(id);if(!el)return;
   const t=el.textContent;
-  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>flash(id)).catch(()=>fallbackCopy(t));}
-  else fallbackCopy(t);}
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>flash(btnId)).catch(()=>{fallbackCopy(t);flash(btnId);});}
+  else {fallbackCopy(t);flash(btnId);}}
 function fallbackCopy(t){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}document.body.removeChild(ta);}
-function flash(id){/* dezentes Feedback ohne Layout-Sprung */}
+function flash(btnId){const b=document.getElementById(btnId);if(!b)return;const o=b.textContent;b.textContent=L().tCopied;setTimeout(()=>{b.textContent=L().tCopy;},1400);}
 function downloadRegisterCSV(){
-  const rows=[CSV_HEAD,...CSV_ROWS];
+  const T=L();
+  const rows=[T.csvHead,...T.csvRows];
   const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(";")).join("\n");
   const blob=new Blob(["\ufeff"+csv],{type:'text/csv'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fernwartungsregister-vorlage.csv';a.click();
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=T.csvName;a.click();
 }
 function saveJSON(){const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='jit-fernwartung-fahrplan.json';a.click();}
@@ -388,13 +457,14 @@ function loadJSON(e){const f=e.target.files[0];if(!f)return;const r=new FileRead
     if(d&&d.ans){state.werk=d.werk||"";state.datum=d.datum||todayISO();
       QUESTIONS.forEach(q=>state.ans[q.key]=(q.key in d.ans)?d.ans[q.key]:null);
       syncFields();renderQuestions();renderPlan();}
-  }catch(err){alert('Datei nicht lesbar.');}};r.readAsText(f);e.target.value='';}
+  }catch(err){alert(L().notRead);}};r.readAsText(f);e.target.value='';}
 function syncFields(){const w=document.getElementById('werk');if(w)w.value=state.werk||'';const dt=document.getElementById('datum');if(dt)dt.value=state.datum||'';}
 
 /* ---- Seed: typisches Ausgangsbild ---- */
 function seed(){initState();
   state.werk="";state.ans={register:"Teilweise",access:"E-Mail-Anfrage",oem:"Einzelne",gateway:"Teilweise / mehrere Wege",mfa:"Nein",recording:"Nein",konstellation:"Unklar / nicht geprüft"};}
-seed();syncFields();renderQuestions();renderPlan();
+try{if(new URLSearchParams(location.search).get('lang')==='en')lang='en';}catch(e){}
+seed();syncFields();applyLang();renderQuestions();renderPlan();
 </script>
 </body>
 </html>
